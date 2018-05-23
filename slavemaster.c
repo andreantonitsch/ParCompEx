@@ -2,11 +2,15 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-#define TASKS = 7
-#define TASK_SIZE = 100
+#define TASKS  1000
+#define TASK_SIZE 10000
 
-#define DATA_TAG = 0
-#define DONE_TAG = 2
+#define DATA_TAG 0
+#define DONE_TAG 2
+
+int cmpfunc (const void* a, const void* b){
+	return (*(int*)a - *(int*)b);
+}
 
 
 int main(int argc, char **argv)
@@ -47,6 +51,16 @@ int main(int argc, char **argv)
         for(i = 1; i < proc_n; i++)
             processes[i] = 0;
         
+	for(i = 0; i< TASKS * TASK_SIZE; i++)
+		bag[0][i] = (TASKS * TASK_SIZE) - i;
+	int j;
+	// for(i = 0; i < TASKS; i ++){
+	// 	for(j = 0; j < TASK_SIZE; j++){
+	// 		printf("%d ", bag[i][j]);
+	// 	}
+	// 	printf("\n");
+	// }
+
         next_task = 0;
         complete_tasks = 0;
 
@@ -64,17 +78,18 @@ int main(int argc, char **argv)
             processes[n] = next_task;
             MPI_Send(bag[next_task], TASK_SIZE, MPI_INT, n, DATA_TAG, MPI_COMM_WORLD);
             next_task++;
+            printf(".");
         }
 
         //isso ta certo????
         while(next_task < TASKS)
         {
             MPI_Probe(MPI_ANY_SOURCE, MPI_ANY_TAG, MPI_COMM_WORLD, &status);
-
             MPI_Recv(bag[processes[status.MPI_SOURCE]], TASK_SIZE, MPI_INT, MPI_ANY_SOURCE, DATA_TAG, MPI_COMM_WORLD, &status);
             complete_tasks++;
             processes[status.MPI_SOURCE] = next_task;
             MPI_Send(bag[next_task], TASK_SIZE, MPI_INT, status.MPI_SOURCE, DATA_TAG, MPI_COMM_WORLD);
+            printf(".");
             next_task++;
         }
 
@@ -88,49 +103,59 @@ int main(int argc, char **argv)
             MPI_Probe(MPI_ANY_SOURCE, MPI_ANY_TAG, MPI_COMM_WORLD, &status);
             MPI_Recv(bag[processes[status.MPI_SOURCE]], TASK_SIZE, MPI_INT, MPI_ANY_SOURCE, DATA_TAG, MPI_COMM_WORLD, &status);
             complete_tasks++;
-
             //manda parar a zoeira.
             MPI_Send(&sopranaomenar, 1, MPI_INT, status.MPI_SOURCE, DONE_TAG, MPI_COMM_WORLD);
         }
 
 
+	// int i,j;
+	// for(i = 0; i < TASKS; i ++){
+    //             for(j = 0; j < TASK_SIZE; j++){
+    //                     printf("%d ", bag[i][j]);
+    //             }
+    //             printf("\n");
+    //     }
+
+
+        double end_time = MPI_Wtime();
+        printf("time: %f\n", end_time - start_time);
 
     } else {
 
-        while(true)
+        while(1)
         {
-            MPI_Probe(0, MPI_ANY_TAG, MPI_COMM_WORLD, &status);
+            MPI_Recv(task, TASK_SIZE, MPI_INT, 0, MPI_ANY_TAG, MPI_COMM_WORLD, &status);
 
             if(status.MPI_TAG == 0)
             {
-                MPI_Recv(task, TASK_SIZE, MPI_INT, 0, DATA_TAG, MPI_COMM_WORLD, &status);
-                
+
+		qsort(task, TASK_SIZE, sizeof(int), cmpfunc);
+
                 //bubblesort
-                int k, l, m;
-                for(k=0;k<TASK_SIZE;k++){
-                    for(l=k;l<TASK_SIZE-1;l++){
-                        if(task[l] > task[l+1])
-                        {
-                            m = task[l];
-                            task[l] = task[l+1];
-                            task[l+1] = m;
-                        }
-                    }
-                }
+                // int k, l, m;
+                // for(k=0;k<TASK_SIZE;k++){
+                //     for(l=0;l<TASK_SIZE-1;l++){
+                //         if(task[l] > task[l+1])
+                //         {
+                //             m = task[l];
+                //             task[l] = task[l+1];
+                //             task[l+1] = m;
+                //         }
+                //     }
+                // }
 
                 MPI_Send(task, TASK_SIZE, MPI_INT, 0, DATA_TAG, MPI_COMM_WORLD);
             }
             
             //recv para desbloquear master?
             if(status.MPI_TAG == 2)
-                MPI_Recv(&sopranaomenar, 1, MPI_INT, 0, DONE_TAG, MPI_COMM_WORLD, &status);
+                break;
+                //MPI_Recv(&sopranaomenar, 1, MPI_INT, 0, DONE_TAG, MPI_COMM_WORLD, &status);
+                
         }
 
     }
 
-
-    double end_time = MPI_Wtime();
-    printf("time: %f\n", end_time - start_time);
 
     MPI_Finalize();
 
