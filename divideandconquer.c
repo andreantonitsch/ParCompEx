@@ -2,13 +2,13 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-#define TASK_SIZE = 100
-#define MINIMUM_WORK = 10
-#define SELF_PERC   = 10 // task_size/self_perc = branch work
+#define TASK_SIZE  100
+#define MINIMUM_WORK  10
+#define SELF_PERC    10 // task_size/self_perc = branch work
 
-#define DATA_TAG = 0
-#define DONE_TAG = 2
-#define KILL_TAG = 4
+#define DATA_TAG  0
+#define DONE_TAG  2
+#define KILL_TAG  4
 
 
 void bubble_sort(int* vector, int size)
