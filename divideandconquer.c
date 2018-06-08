@@ -51,11 +51,12 @@ int i, j, k, m = 0;
                             if(vector1[j] < vector3[m]){
                                 output[i++] = vector1[j++];
                             }else{
-                                if(vector3[m] < vector2[k])
+                                if(vector3[m] < vector2[k]){
                                     output[i++] = vector3[m++];
-                                else
+                                } else{
                                     output[i++] = vector2[k++];
                                 }
+                            }
                     }else{
                         if(vector2[k] < vector3[m]){
                             output[i++] = vector2[k++];
