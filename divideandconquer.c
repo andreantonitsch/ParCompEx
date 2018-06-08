@@ -35,69 +35,135 @@ void bubble_sort(int* vector, int size)
 //Challenge accepted
 void merge(int*output, int* vector1, int size1, int* vector2, int size2, int* vector3, int size3)
 {
-printf("vecotr1: ");
-printv(vector1, size1);
-printf("vecotr2: ");
-printv(vector2, size2);
-printf("vecotr3: ");
-printv(vector3, size3);
-printf("meme");
+//printf("vecotr1: ");
+//printv(vector1, size1);
+//printf("vecotr2: ");
+//printv(vector2, size2);
+//printf("vecotr3: ");
+//printv(vector3, size3);
+//printf("meme");
 int i, j, k, m = 0;
-    while(i <size1+size2+size3){
-        if (j < size1 ){
-            if(k < size2){
-                if(m<size3){
-                    if(vector1[j] < vector2[k]){
-                            if(vector1[j] < vector3[m]){
-                                output[i++] = vector1[j++];
-                            }else{
-                                if(vector3[m] < vector2[k]){
-                                    output[i++] = vector3[m++];
-                                } else{
-                                    output[i++] = vector2[k++];
-                                }
-                            }
+while(i < size1+size2+size3){
+
+    if(j < size1){
+        if(k< size2){
+            if(m < size3){
+                if(vector1[j] < vector2[k]){
+                    if(vector1[j] < vector3[m]){
+                        output[i] = vector1[j];
+                        j++;
+                        i++;
                     }else{
-                        if(vector2[k] < vector3[m]){
-                            output[i++] = vector2[k++];
-                        }else{
-                            output[i++] = vector3[m++];
-                            }
-                        }
+                        output[i] = vector3[m];
+                        m++;
+                        i++;
+                    }
                 }else{
-                    if(vector1[j] < vector2[k]){
-                        output[i++] = vector1[j++];
+                    if(vector2[k] < vector3[m]){
+                        output[i] = vector2[k];
+                        k++;
+                        i++;
                     }else{
-                        output[i++] = vector2[k++];
+                        output[i] = vector3[m];
+                        m++;
+                        i++;
                     }
                 }
             }else{
-                if(m<size3){
-                    if(vector1[j] < vector3[m]){
-                        output[i++] = vector1[j++];
-                    }else{
-                        output[i++] = vector3[m++];
-                    }
-                }else{
-                    output[i++] = vector1[j++];
-                }
+                if(vector1[j] < vector2[k]){
+			output[i] = vector1[j];
+			i++;
+			j++;
+		}else{
+			output[i] = vector2[k];
+			k++;
+			i++;
+		}
             }
         }else{
-             if(k<size2){
-                if(m<size3){
-                    if(vector2[k] < vector3[m]){
-                        output[i++] = vector2[k++];
-                    }else{
-                        output[i++] = vector3[m++];
-                    }
-                }else{
-                    output[i++] = vector2[k++];
-                }
-            }else{
-                output[i++] = vector3[m++];
-            }
+		if(j < size1){
+			if(m < size3){
+				if(vector1[j] < vector3[m]){
+					output[i] = vector1[j];
+					i++;
+					j++;
+				}else{
+					output[i] = vector3[m];
+					i++;
+					m++;
+				}
+			}else{
+				output[i] = vector1[j];
+				i++;
+				j++;
+			}
+		}else{
+			output[i] = vector3[m];
+		}
         }
+    }else{
+
     }
+
+
+}
+    // while(i <size1+size2+size3){
+    //     if (j < size1 ){
+    //         if(k < size2){
+    //             if(m<size3){
+    //                 if(vector1[j] < vector2[k]){
+    //                         if(vector1[j] < vector3[m]){
+    //                             output[i++] = vector1[j++];
+    //                         }else{
+    //                             if(vector3[m] < vector2[k]){
+    //                                 output[i++] = vector3[m++];
+    //                             } else{
+    //                                 output[i++] = vector2[k++];
+    //                             }
+    //                         }
+    //                 }else{
+    //                     if(vector2[k] < vector3[m]){
+    //                         output[i++] = vector2[k++];
+    //                     }else{
+    //                         output[i++] = vector3[m++];
+    //                         }
+    //                     }
+    //             }else{
+    //                 if(vector1[j] < vector2[k]){
+    //                     output[i++] = vector1[j++];
+    //                 }else{
+    //                     output[i++] = vector2[k++];
+    //                 }
+    //             }
+    //         }else{
+    //             if(m<size3){
+    //                 if(vector1[j] < vector3[m]){
+    //                     output[i++] = vector1[j++];
+    //                 }else{
+    //                     output[i++] = vector3[m++];
+    //                 }
+    //             }else{
+    //                 output[i++] = vector1[j++];
+    //             }
+    //         }
+    //     }else{
+    //          if(k<size2){
+    //             if(m<size3){
+    //                 if(vector2[k] < vector3[m]){
+    //                     output[i++] = vector2[k++];
+    //                 }else{
+    //                     output[i++] = vector3[m++];
+    //                 }
+    //             }else{
+    //                 output[i++] = vector2[k++];
+    //             }
+    //         }else{
+    //             output[i++] = vector3[m++];
+    //         }
+    //     }
+    // }
+    printf("merged");
+    printv(output, size1+size2+size3);
 }
 
 int main(int argc, char **argv)
@@ -191,7 +257,7 @@ int main(int argc, char **argv)
                     MPI_Send(task, current_task_size, MPI_INT, father, DONE_TAG, MPI_COMM_WORLD);
                 }else{
                     //weeee dobby is freeeeee
-                    //printv(task, current_task_size);
+                    printv(task, current_task_size);
                 }
             }
 
