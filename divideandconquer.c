@@ -1,21 +1,26 @@
 #include "mpi.h"
 #include <stdio.h>
 #include <stdlib.h>
-
+#include <string.h>
 #define TASK_SIZE  100
-#define MINIMUM_WORK  10
+#define MINIMUM_WORK  30
 #define SELF_PERC    10 // task_size/self_perc = branch work
 
 #define DATA_TAG  0
 #define DONE_TAG  2
-#define KILL_TAG  4
 
+void printv(int* vector, int size){
+    int g;
+    for(g = 0; g < size; g++)
+        printf("%d ", vector[g]);
+
+}
 
 void bubble_sort(int* vector, int size)
 {
     int k, l, m;
     for(k=0;k<size;k++){
-        for(l=k;l<size-1;l++){
+        for(l=0;l<size-1;l++){
             if(vector[l] > vector[l+1])
             {
                 m = vector[l];
@@ -26,17 +31,70 @@ void bubble_sort(int* vector, int size)
     }
 }
 
-
-void merge(int*output, int* vector1, int size1, int* vector2, int size2 )
+//Eu me recuso a usar {} quando preciso em um for ou if de um comando. --Agustini, 2018
+//Challenge accepted
+void merge(int*output, int* vector1, int size1, int* vector2, int size2, int* vector3, int size3)
 {
-    int i, j, k = 0;
-    for(i = 0;i<size1+size2;i++){
-        if(vector1[j] > vector2[k]){
-            output[i] = vector2[k];
-            k++;
+printf("vecotr1: ");
+printv(vector1, size1);
+printf("vecotr2: ");
+printv(vector2, size2);
+printf("vecotr3: ");
+printv(vector3, size3);
+printf("meme");
+int i, j, k, m = 0;
+    while(i <size1+size2+size3){
+        if (j < size1 ){
+            if(k < size2){
+                if(m<size3){
+                    if(vector1[j] < vector2[k]){
+                            if(vector1[j] < vector3[m]){
+                                output[i++] = vector1[j++];
+                            }else{
+                                if(vector3[m] < vector2[k])
+                                    output[i++] = vector3[m++];
+                                else
+                                    output[i++] = vector2[k++];
+                                }
+                    }else{
+                        if(vector2[k] < vector3[m]){
+                            output[i++] = vector2[k++];
+                        }else{
+                            output[i++] = vector3[m++];
+                            }
+                        }
+                }else{
+                    if(vector1[j] < vector2[k]){
+                        output[i++] = vector1[j++];
+                    }else{
+                        output[i++] = vector2[k++];
+                    }
+                }
+            }else{
+                if(m<size3){
+                    if(vector1[j] < vector3[m]){
+                        output[i++] = vector1[j++];
+                    }else{
+                        output[i++] = vector3[m++];
+                    }
+                }else{
+                    output[i++] = vector1[j++];
+                }
+            }
         }else{
-            output[i] = vector1[j];
-            j++;
+             if(k<size2){
+                if(m<size3){
+                    if(vector2[k] < vector3[m]){
+                        output[i++] = vector2[k++];
+                    }else{
+                        output[i++] = vector3[m++];
+                    }
+                }else{
+                    output[i++] = vector2[k++];
+                }
+            }else{
+                output[i++] = vector3[m++];
+            }
         }
     }
 }
@@ -48,8 +106,9 @@ int main(int argc, char **argv)
     int proc_n;         // Numero de processos disparados pelo usuário na linha de comando (np)
 
     int* task;  //working task
-    int* temp_task; //portion of task dividing nodes processs
-    int* merge_task;
+    int* task1; //portion of task dividing nodes processs
+    int* task2;
+    int* task3;
 
     int current_task_size;
     int slice_work_size;
@@ -57,19 +116,16 @@ int main(int argc, char **argv)
 
     MPI_Status status;
     MPI_Init(&argc, &argv); // funcao que inicializa o MPI, todo o código paralelo esta abaixo
-  
+
     MPI_Comm_rank(MPI_COMM_WORLD, &my_rank);  // pega o numero do processo atual (rank)
     MPI_Comm_size(MPI_COMM_WORLD,  &proc_n);  // pega informação do numero de processos (quantidade total)
     double start_time;
 
 
     //inicializa memorias
-    int buffer_size = TASK_SIZE;
-    int s;
-    for(s = my_rank; s > 0; s /= 2)
-    {
-        buffer_size /= 2;
-    }
+   int buffer_size = TASK_SIZE;
+
+    //printf("%d, %d \n", my_rank, buffer_size);
     task = malloc(sizeof(int) * buffer_size);
 
 
@@ -80,102 +136,79 @@ int main(int argc, char **argv)
             task[i] = TASK_SIZE - i;
 
         //placeholder
-        current_task_size = TASK_SIZE;  
+        current_task_size = TASK_SIZE;
     }
 
+    int father;
     //Receives task
     if(my_rank != 0){
 
-        MPI_Probe(MPI_ANY_SOURCE, MPI_ANY_TAG, MPI_COMM_WORLD, &status);
-
-        //stop and stuff
-        if(status.MPI_TAG == KILL_TAG){
-            MPI_Recv(task, buffer_size, MPI_INT, status.MPI_SOURCE, KILL_TAG, MPI_COMM_WORLD, &status);
-            current_task_size = -1;
-        }
-        
-        if(status.MPI_TAG == DATA_TAG){
-            MPI_Recv(task, buffer_size, MPI_INT, MPI_ANY_SOURCE, DATA_TAG, MPI_COMM_WORLD, &status);
-            current_task_size = task[0];
-            task = task+1; //takes size int out of vector (loses some memory whoops)
-        }
+	MPI_Recv(task, buffer_size, MPI_INT, MPI_ANY_SOURCE, DATA_TAG, MPI_COMM_WORLD, &status);
+        MPI_Get_count(&status, MPI_INT, &current_task_size);
+        printf("%d Received Msg0 from: %d, Size: %d \n", my_rank, status.MPI_SOURCE, current_task_size);
+        father = status.MPI_SOURCE;
     }
 
     //se existe trabalho a ser feito. work work work.
-    if(current_task_size > 0){
-
-        if(my_rank < proc_n /2) //se node isn't certainly a leaf
-        {
+    if(my_rank < proc_n /2) //se node isn't certainly a leaf
+    {
             //Divide
             if(current_task_size > MINIMUM_WORK){
-                divide_size = current_task_size - (current_task_size / SELF_PERC);
                 slice_work_size = current_task_size / SELF_PERC;
+                divide_size = current_task_size - slice_work_size;
 
-                temp_task =  malloc(sizeof(int) * (divide_size / 2)+1); 
-                merge_task = malloc(sizeof(int) * current_task_size);
 
+                task1 = malloc(sizeof(int) * current_task_size);
+                task2 = malloc(sizeof(int) * current_task_size);
+		        task3 = malloc(sizeof(int) * current_task_size);
                 //Test
+                printf("%d Sending Msg1 to: %d, Size: %d \n", my_rank, (my_rank * 2) + 1, (divide_size/2));
+                printf("%d Sending Msg1 to: %d, Size: %d \n", my_rank, (my_rank*2)+2, (divide_size - (divide_size / 2)) );
+
+
                 MPI_Send(task + slice_work_size, divide_size / 2, MPI_INT, (my_rank * 2)+1, DATA_TAG, MPI_COMM_WORLD);
                 MPI_Send(task + slice_work_size + (divide_size / 2), divide_size - (divide_size / 2), MPI_INT, (my_rank * 2)+2, DATA_TAG, MPI_COMM_WORLD);
 
-                bubble_sort(task, slice_work_size);
+                memcpy(task1, task, slice_work_size * sizeof(int));
 
-                //Fuse processed data
-                int total_received_size = 0;
+                bubble_sort(task1, slice_work_size);
+		        //printv(task1, slice_work_size);
 
-                MPI_Probe(MPI_ANY_SOURCE, MPI_ANY_TAG, MPI_COMM_WORLD, &status);
-                if(status.MPI_TAG == (my_rank * 2)+1)
-                {
-                    MPI_Recv(temp_task, divide_size / 2 , MPI_INT, status.MPI_SOURCE, status.MPI_TAG, MPI_COMM_WORLD, &status);
-                    total_received_size = divide_size / 2;
-                }else{
-                    MPI_Recv(temp_task, divide_size - (divide_size / 2) , MPI_INT, status.MPI_SOURCE, status.MPI_TAG, MPI_COMM_WORLD, &status);
-                    total_received_size = divide_size - (divide_size / 2);
-                }
+                int task2_leng;
+                MPI_Recv(task2, buffer_size, MPI_INT, MPI_ANY_SOURCE, MPI_ANY_TAG, MPI_COMM_WORLD, &status);
+                MPI_Get_count(&status, MPI_INT, &task2_leng);
+                printf("%d Received Msg3 from: %d, Size: %d \n", my_rank, status.MPI_SOURCE, task2_leng);
 
-                merge(merge_task, task, slice_work_size, temp_task, total_received_size);
-                total_received_size = total_received_size + slice_work_size;
+                int task3_leng;
+                MPI_Recv(task3, buffer_size, MPI_INT, MPI_ANY_SOURCE, MPI_ANY_TAG, MPI_COMM_WORLD, &status);
+                MPI_Get_count(&status, MPI_INT, &task3_leng);
+                printf("%d Received Msg3 from: %d, Size: %d \n", my_rank, status.MPI_SOURCE, task3_leng);
 
-                int last_message_size = 0;
-                MPI_Probe(MPI_ANY_SOURCE, MPI_ANY_TAG, MPI_COMM_WORLD, &status);
-                if(status.MPI_TAG == (my_rank * 2)+1)
-                {
-                    MPI_Recv(temp_task, divide_size / 2 , MPI_INT, status.MPI_SOURCE, status.MPI_TAG, MPI_COMM_WORLD, &status);
-                    last_message_size = divide_size / 2;
-                }else{
-                    MPI_Recv(temp_task, divide_size - (divide_size / 2) , MPI_INT, status.MPI_SOURCE, status.MPI_TAG, MPI_COMM_WORLD, &status);
-                    last_message_size = divide_size - (divide_size / 2);
-                }
-
-                merge(task, merge_task, total_received_size, temp_task, last_message_size);
+                merge(task, task1, slice_work_size, task2, task2_leng, task3, task3_leng);
 
                 if(my_rank != 0){
-                    MPI_Send(task + slice_work_size, divide_size / 2, MPI_INT, floor(my_rank / 2), DONE_TAG, MPI_COMM_WORLD);
+                    MPI_Send(task, current_task_size, MPI_INT, father, DONE_TAG, MPI_COMM_WORLD);
                 }else{
                     //weeee dobby is freeeeee
-                    int g;
-                    for(g = 0; g < TASK_SIZE; g++)
-                        printf("%d ", task[g]);
+                    //printv(task, current_task_size);
                 }
-            }   
-            
+            }
+
             //Conquer
             else{
-                
+
                 bubble_sort(task, current_task_size);
-                MPI_Send(NULL,0 ,  MPI_INT, (my_rank * 2)+1, KILL_TAG, MPI_COMM_WORLD);
-                MPI_Send(NULL, 0, MPI_INT, (my_rank * 2)+2, KILL_TAG, MPI_COMM_WORLD);
-                MPI_Send(task, current_task_size, MPI_INT, floor(my_rank / 2), DONE_TAG, MPI_COMM_WORLD);
+		        //printv(task, current_task_size);
+                MPI_Send(task, current_task_size, MPI_INT, father, DONE_TAG, MPI_COMM_WORLD);
 
             }
 
-        }else{ //Node is a leaf
-            bubble_sort(task, current_task_size);
-            MPI_Send(task, current_task_size, MPI_INT, floor(my_rank / 2), DONE_TAG, MPI_COMM_WORLD);
-        }
-
-
+    }else{ //Node is a leaf
+        bubble_sort(task, current_task_size);
+	    //printv(task, current_task_size);
+	MPI_Send(task, current_task_size, MPI_INT, father, DONE_TAG, MPI_COMM_WORLD);
     }
+    
 
     MPI_Finalize();
 }
