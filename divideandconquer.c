@@ -100,11 +100,31 @@ while(i < size1+size2+size3){
 		}else{
 			output[i] = vector3[m];
 		}
-        }
+    }
     }else{
-
+        if(k < size2){
+                    if(m < size3){
+                        if(vector2[k] < vector3[m]){
+                            output[i] = vector2[k];
+                            i++;
+                            k++;
+                        }else{
+                            output[i] = vector3[m];
+                            i++;
+                            m++;
+                        }
+                    }else{
+                        output[i] = vector2[k];
+                        i++;
+                        k++;
+                    }
+                }else{
+                    output[i] = vector3[m];
+                }
+            }
     }
 
+printv(output, size1+size2+size3);
 
 }
     // while(i <size1+size2+size3){
