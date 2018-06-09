@@ -2,12 +2,15 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#define TASK_SIZE  100
+#define TASK_SIZE  1000000
 #define MINIMUM_WORK  30
 #define SELF_PERC    10 // task_size/self_perc = branch work
 
 #define DATA_TAG  0
 #define DONE_TAG  2
+
+#define VERBOSE 1
+#define VERBOSE_OUT 0
 
 void printv(int* vector, int size){
     int g;
@@ -31,7 +34,6 @@ void bubble_sort(int* vector, int size)
     }
 }
 
-void comp(int**vectors, int*sizes, int vec_len)
 
 //Eu me recuso a usar {} quando preciso em um for ou if de um comando. --Agustini, 2018
 //Challenge accepted
@@ -44,7 +46,8 @@ void merge(int*output, int* vector1, int size1, int* vector2, int size2, int* ve
 //printf("vecotr3: ");
 //printv(vector3, size3);
 //printf("meme");
-int i = j = k = m = 0;
+int i, j, k, m;
+i = j = k = m = 0;
 
     while(i <size1+size2+size3)
         if (j < size1 )
@@ -65,7 +68,7 @@ int i = j = k = m = 0;
                         else
                             output[i++] = vector3[m++];
                             
-                        
+  
                 else
                     if(vector1[j] < vector2[k])
                         output[i++] = vector1[j++];
@@ -91,16 +94,12 @@ int i = j = k = m = 0;
                         output[i++] = vector2[k++];
                     else
                         output[i++] = vector3[m++];
-                    
                 else
                     output[i++] = vector2[k++];
-                
             else
                 output[i++] = vector3[m++];
-          
-    
-    printf("merged");
-    printv(output, size1+size2+size3);
+//    printf("merged");
+//    printv(output, size1+size2+size3);
 }
 
 int main(int argc, char **argv)
@@ -141,7 +140,9 @@ int main(int argc, char **argv)
 
         //placeholder
         current_task_size = TASK_SIZE;
-    }
+    	start_time = MPI_Wtime();
+
+	}
 
     int father;
     //Receives task
@@ -149,7 +150,8 @@ int main(int argc, char **argv)
 
 	MPI_Recv(task, buffer_size, MPI_INT, MPI_ANY_SOURCE, DATA_TAG, MPI_COMM_WORLD, &status);
         MPI_Get_count(&status, MPI_INT, &current_task_size);
-        printf("%d Received Msg0 from: %d, Size: %d \n", my_rank, status.MPI_SOURCE, current_task_size);
+	if(VERBOSE)
+        	printf("%d Received Downward from: %d, Size: %d \n", my_rank, status.MPI_SOURCE, current_task_size);
         father = status.MPI_SOURCE;
     }
 
@@ -166,9 +168,10 @@ int main(int argc, char **argv)
                 task2 = malloc(sizeof(int) * current_task_size);
 		        task3 = malloc(sizeof(int) * current_task_size);
                 //Test
-                printf("%d Sending Msg1 to: %d, Size: %d \n", my_rank, (my_rank * 2) + 1, (divide_size/2));
-                printf("%d Sending Msg1 to: %d, Size: %d \n", my_rank, (my_rank*2)+2, (divide_size - (divide_size / 2)) );
-
+		if(VERBOSE){
+                printf("%d Sending Downward to: %d, Size: %d \n", my_rank, (my_rank * 2) + 1, (divide_size/2));
+                printf("%d Sending Downward to: %d, Size: %d \n", my_rank, (my_rank*2)+2, (divide_size - (divide_size / 2)) );
+		}
 
                 MPI_Send(task + slice_work_size, divide_size / 2, MPI_INT, (my_rank * 2)+1, DATA_TAG, MPI_COMM_WORLD);
                 MPI_Send(task + slice_work_size + (divide_size / 2), divide_size - (divide_size / 2), MPI_INT, (my_rank * 2)+2, DATA_TAG, MPI_COMM_WORLD);
@@ -181,12 +184,14 @@ int main(int argc, char **argv)
                 int task2_leng;
                 MPI_Recv(task2, buffer_size, MPI_INT, MPI_ANY_SOURCE, MPI_ANY_TAG, MPI_COMM_WORLD, &status);
                 MPI_Get_count(&status, MPI_INT, &task2_leng);
-                printf("%d Received Msg3 from: %d, Size: %d \n", my_rank, status.MPI_SOURCE, task2_leng);
+		if(VERBOSE)
+                	printf("%d Received Msg3 from: %d, Size: %d \n", my_rank, status.MPI_SOURCE, task2_leng);
 
                 int task3_leng;
                 MPI_Recv(task3, buffer_size, MPI_INT, MPI_ANY_SOURCE, MPI_ANY_TAG, MPI_COMM_WORLD, &status);
                 MPI_Get_count(&status, MPI_INT, &task3_leng);
-                printf("%d Received Msg3 from: %d, Size: %d \n", my_rank, status.MPI_SOURCE, task3_leng);
+                if(VERBOSE)
+			printf("%d Received Msg3 from: %d, Size: %d \n", my_rank, status.MPI_SOURCE, task3_leng);
 
                 merge(task, task1, slice_work_size, task2, task2_leng, task3, task3_leng);
 
@@ -194,8 +199,12 @@ int main(int argc, char **argv)
                     MPI_Send(task, current_task_size, MPI_INT, father, DONE_TAG, MPI_COMM_WORLD);
                 }else{
                     //weeee dobby is freeeeee
-                    printv(task, current_task_size);
-                }
+                    double end_time = MPI_Wtime();
+		    printf("Time!: %f", end_time - start_time);
+		    if(VERBOSE_OUT)
+			printv(task, current_task_size);
+                
+		}
             }
 
             //Conquer
