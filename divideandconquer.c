@@ -31,6 +31,8 @@ void bubble_sort(int* vector, int size)
     }
 }
 
+void comp(int**vectors, int*sizes, int vec_len)
+
 //Eu me recuso a usar {} quando preciso em um for ou if de um comando. --Agustini, 2018
 //Challenge accepted
 void merge(int*output, int* vector1, int size1, int* vector2, int size2, int* vector3, int size3)
@@ -42,148 +44,61 @@ void merge(int*output, int* vector1, int size1, int* vector2, int size2, int* ve
 //printf("vecotr3: ");
 //printv(vector3, size3);
 //printf("meme");
-int i, j, k, m = 0;
-while(i < size1+size2+size3){
+int i = j = k = m = 0;
 
-    if(j < size1){
-        if(k< size2){
-            if(m < size3){
-                if(vector1[j] < vector2[k]){
-                    if(vector1[j] < vector3[m]){
-                        output[i] = vector1[j];
-                        j++;
-                        i++;
-                    }else{
-                        output[i] = vector3[m];
-                        m++;
-                        i++;
-                    }
-                }else{
-                    if(vector2[k] < vector3[m]){
-                        output[i] = vector2[k];
-                        k++;
-                        i++;
-                    }else{
-                        output[i] = vector3[m];
-                        m++;
-                        i++;
-                    }
-                }
-            }else{
-                if(vector1[j] < vector2[k]){
-			output[i] = vector1[j];
-			i++;
-			j++;
-		}else{
-			output[i] = vector2[k];
-			k++;
-			i++;
-		}
-            }
-        }else{
-		if(j < size1){
-			if(m < size3){
-				if(vector1[j] < vector3[m]){
-					output[i] = vector1[j];
-					i++;
-					j++;
-				}else{
-					output[i] = vector3[m];
-					i++;
-					m++;
-				}
-			}else{
-				output[i] = vector1[j];
-				i++;
-				j++;
-			}
-		}else{
-			output[i] = vector3[m];
-            i++;
-            m++;
-		}
-    }
-    }else{
-        if(k < size2){
-                    if(m < size3){
-                        if(vector2[k] < vector3[m]){
-                            output[i] = vector2[k];
-                            i++;
-                            k++;
-                        }else{
-                            output[i] = vector3[m];
-                            i++;
-                            m++;
-                        }
-                    }else{
-                        output[i] = vector2[k];
-                        i++;
-                        k++;
-                    }
-                }else{
-                    output[i] = vector3[m];
-                    i++;
-                    m++;
-                }
-            }
-    }
-
-
-    // while(i <size1+size2+size3){
-    //     if (j < size1 ){
-    //         if(k < size2){
-    //             if(m<size3){
-    //                 if(vector1[j] < vector2[k]){
-    //                         if(vector1[j] < vector3[m]){
-    //                             output[i++] = vector1[j++];
-    //                         }else{
-    //                             if(vector3[m] < vector2[k]){
-    //                                 output[i++] = vector3[m++];
-    //                             } else{
-    //                                 output[i++] = vector2[k++];
-    //                             }
-    //                         }
-    //                 }else{
-    //                     if(vector2[k] < vector3[m]){
-    //                         output[i++] = vector2[k++];
-    //                     }else{
-    //                         output[i++] = vector3[m++];
-    //                         }
-    //                     }
-    //             }else{
-    //                 if(vector1[j] < vector2[k]){
-    //                     output[i++] = vector1[j++];
-    //                 }else{
-    //                     output[i++] = vector2[k++];
-    //                 }
-    //             }
-    //         }else{
-    //             if(m<size3){
-    //                 if(vector1[j] < vector3[m]){
-    //                     output[i++] = vector1[j++];
-    //                 }else{
-    //                     output[i++] = vector3[m++];
-    //                 }
-    //             }else{
-    //                 output[i++] = vector1[j++];
-    //             }
-    //         }
-    //     }else{
-    //          if(k<size2){
-    //             if(m<size3){
-    //                 if(vector2[k] < vector3[m]){
-    //                     output[i++] = vector2[k++];
-    //                 }else{
-    //                     output[i++] = vector3[m++];
-    //                 }
-    //             }else{
-    //                 output[i++] = vector2[k++];
-    //             }
-    //         }else{
-    //             output[i++] = vector3[m++];
-    //         }
-    //     }
-    // }
+    while(i <size1+size2+size3)
+        if (j < size1 )
+            if(k < size2)
+                if(m<size3)
+                    if(vector1[j] < vector2[k])
+                            if(vector1[j] < vector3[m])
+                                output[i++] = vector1[j++];
+                            else
+                                if(vector3[m] < vector2[k])
+                                    output[i++] = vector3[m++];
+                                else
+                                    output[i++] = vector2[k++];
+                                
+                    else
+                        if(vector2[k] < vector3[m])
+                            output[i++] = vector2[k++];
+                        else
+                            output[i++] = vector3[m++];
+                            
+                        
+                else
+                    if(vector1[j] < vector2[k])
+                        output[i++] = vector1[j++];
+                    else
+                        output[i++] = vector2[k++];
+                    
+                
+            else
+                if(m<size3)
+                    if(vector1[j] < vector3[m])
+                        output[i++] = vector1[j++];
+                    else
+                        output[i++] = vector3[m++];
+                    
+                else
+                    output[i++] = vector1[j++];
+                
+            
+        else
+             if(k<size2)
+                if(m<size3)
+                    if(vector2[k] < vector3[m])
+                        output[i++] = vector2[k++];
+                    else
+                        output[i++] = vector3[m++];
+                    
+                else
+                    output[i++] = vector2[k++];
+                
+            else
+                output[i++] = vector3[m++];
+          
+    
     printf("merged");
     printv(output, size1+size2+size3);
 }
