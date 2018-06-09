@@ -99,6 +99,8 @@ while(i < size1+size2+size3){
 			}
 		}else{
 			output[i] = vector3[m];
+            i++;
+            m++;
 		}
     }
     }else{
@@ -120,6 +122,8 @@ while(i < size1+size2+size3){
                     }
                 }else{
                     output[i] = vector3[m];
+                    i++;
+                    m++;
                 }
             }
     }
