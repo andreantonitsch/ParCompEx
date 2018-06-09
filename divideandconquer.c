@@ -124,9 +124,7 @@ while(i < size1+size2+size3){
             }
     }
 
-printv(output, size1+size2+size3);
 
-}
     // while(i <size1+size2+size3){
     //     if (j < size1 ){
     //         if(k < size2){
