@@ -136,7 +136,7 @@ int main(int argc, char **argv)
     }
 
     //se existe trabalho a ser feito. work work work.
-    if(my_rank < proc_n /2) //se node isn't certainly a leaf
+    if(my_rank < proc_n /2 && proc_n != 1) //se node isn't certainly a leaf
     {
             //Divide
             if(current_task_size > MINIMUM_WORK){
