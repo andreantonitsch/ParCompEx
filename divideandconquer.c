@@ -136,13 +136,12 @@ int main(int argc, char **argv)
     }
 
     //se existe trabalho a ser feito. work work work.
-    if(my_rank < proc_n /2 && proc_n != 1) //se node isn't certainly a leaf
+    if(my_rank < proc_n /2) //se node isn't certainly a leaf
     {
             //Divide
             if(current_task_size > MINIMUM_WORK){
                 slice_work_size = current_task_size / SELF_PERC;
                 divide_size = current_task_size - slice_work_size;
-
 
                 task1 = malloc(sizeof(int) * current_task_size);
                 task2 = malloc(sizeof(int) * current_task_size);
@@ -188,7 +187,6 @@ int main(int argc, char **argv)
 
             //Conquer
             else{
-
                 bubble_sort(task, current_task_size);
                 MPI_Send(task, current_task_size, MPI_INT, father, DONE_TAG, MPI_COMM_WORLD);
             }
