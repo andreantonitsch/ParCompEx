@@ -2,9 +2,9 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#define TASK_SIZE  1000000
+#define TASK_SIZE  100000
 #define MINIMUM_WORK  30
-#define SELF_PERC    10 // task_size/self_perc = branch work
+#define SELF_PERC    10 //task_size/self_perc = branch work
 
 #define DATA_TAG  0
 #define DONE_TAG  2
@@ -39,13 +39,6 @@ void bubble_sort(int* vector, int size)
 //Challenge accepted
 void merge(int*output, int* vector1, int size1, int* vector2, int size2, int* vector3, int size3)
 {
-//printf("vecotr1: ");
-//printv(vector1, size1);
-//printf("vecotr2: ");
-//printv(vector2, size2);
-//printf("vecotr3: ");
-//printv(vector3, size3);
-//printf("meme");
 int i, j, k, m;
 i = j = k = m = 0;
 
@@ -61,32 +54,24 @@ i = j = k = m = 0;
                                     output[i++] = vector3[m++];
                                 else
                                     output[i++] = vector2[k++];
-                                
                     else
                         if(vector2[k] < vector3[m])
                             output[i++] = vector2[k++];
                         else
                             output[i++] = vector3[m++];
-                            
-  
                 else
                     if(vector1[j] < vector2[k])
                         output[i++] = vector1[j++];
                     else
                         output[i++] = vector2[k++];
-                    
-                
             else
                 if(m<size3)
                     if(vector1[j] < vector3[m])
                         output[i++] = vector1[j++];
                     else
                         output[i++] = vector3[m++];
-                    
                 else
                     output[i++] = vector1[j++];
-                
-            
         else
              if(k<size2)
                 if(m<size3)
@@ -98,8 +83,6 @@ i = j = k = m = 0;
                     output[i++] = vector2[k++];
             else
                 output[i++] = vector3[m++];
-//    printf("merged");
-//    printv(output, size1+size2+size3);
 }
 
 int main(int argc, char **argv)
@@ -124,13 +107,10 @@ int main(int argc, char **argv)
     MPI_Comm_size(MPI_COMM_WORLD,  &proc_n);  // pega informação do numero de processos (quantidade total)
     double start_time;
 
-
     //inicializa memorias
    int buffer_size = TASK_SIZE;
 
-    //printf("%d, %d \n", my_rank, buffer_size);
     task = malloc(sizeof(int) * buffer_size);
-
 
     //produces task
     if(my_rank == 0){
@@ -142,7 +122,7 @@ int main(int argc, char **argv)
         current_task_size = TASK_SIZE;
     	start_time = MPI_Wtime();
 
-	}
+    }
 
     int father;
     //Receives task
@@ -203,7 +183,6 @@ int main(int argc, char **argv)
 		    printf("Time!: %f", end_time - start_time);
 		    if(VERBOSE_OUT)
 			printv(task, current_task_size);
-                
 		}
             }
 
@@ -211,17 +190,14 @@ int main(int argc, char **argv)
             else{
 
                 bubble_sort(task, current_task_size);
-		        //printv(task, current_task_size);
                 MPI_Send(task, current_task_size, MPI_INT, father, DONE_TAG, MPI_COMM_WORLD);
-
             }
 
     }else{ //Node is a leaf
         bubble_sort(task, current_task_size);
-	    //printv(task, current_task_size);
 	MPI_Send(task, current_task_size, MPI_INT, father, DONE_TAG, MPI_COMM_WORLD);
     }
-    
+
 
     MPI_Finalize();
 }
