@@ -39,15 +39,11 @@ void bs(int n, int * vetor)
         }
 }
 
-int* vector_init(int size, int start){
-
-    int* vector = malloc(sizeof(int) * size);
+int* vector_init(int* vector, int size, int start){
     int i = 0;
     while(i < size){
         vector[i] = start--;
     }
-
-
 }
 
 int checkready(int* vector, int size){
@@ -69,6 +65,7 @@ int main(int argc, char **argv)
 
     int* task;  //working task
     int* states;
+    int share_size;
 
     MPI_Status status;
     MPI_Init(&argc, &argv); // funcao que inicializa o MPI, todo o código paralelo esta abaixo
@@ -80,9 +77,14 @@ int main(int argc, char **argv)
     int ready = 0;
 
     int slice_size = TASK_SIZE / proc_n;
+    int share_size = floor((TASK_SIZE *  / proc_n) * SHARE_ZONE); 
 
     states = malloc(sizeof(int) * proc_n);
-    task = vector_init(TASK_SIZE / proc_n, my_rank * slice_size);
+
+    int* task = malloc(sizeof(int) * size + 2*share_size);
+    task += share_size;
+
+    vector_init(task, TASK_SIZE / proc_n, my_rank * slice_size);
 
     int left_neighbour_biggust = -1;
 
@@ -92,10 +94,10 @@ int main(int argc, char **argv)
         bs(slice_size, task);
 
         if(my_rank != proc_n-1)
-            MPI_Send(task + slice_size, 1, MPI_INT, my_rank+1, TEST_TAG, MPI_COMM_WORLD);
+            MPI_Send(task + slice_size -1, 1, MPI_INT, my_rank+1, TEST_TAG, MPI_COMM_WORLD);
 
         if(my_rank != 0)
-            MPI_Send(&left_neighbour_biggust, 1, MPI_INT, my_rank-1, TEST_TAG, MPI_COMM_WORLD);
+            MPI_Recv(&left_neighbour_biggust, 1, MPI_INT, my_rank-1, TEST_TAG, MPI_COMM_WORLD);
 
         states[my_rank] = left_neighbour_biggust <= task[0];
 
@@ -104,7 +106,28 @@ int main(int argc, char **argv)
             MPI_Bcast(states + i , 1, MPI_INT, i, MPI_COMM_WORLD)
         }
         
+        //Check stop
+        ready = checkready(states, proc_n);
+        if(ready)
+            break;
+        
+        //converge
+        if(my_rank != 0)
+            MPI_Send(task + slice_size - share_size, share_size, MPI_INT, my_rank-1, DATA_TAG, MPI_COMM_WORLD);
 
+        if(my_rank != proc_n-1)
+            MPI_Recv(task + slice_size, share_size, MPI_INT, my_rank-1, DATA_TAG, MPI_COMM_WORLD);
+        
+            bs(2*share_size, task + slice_size - share_size);
 
-    }
+            MPI_Send(task + slice_size, share_size, MPI_INT, my_rank-1, DATA_TAG, MPI_COMM_WORLD);
 
+        if(my_rank != 0)
+            MPI_Recv(task + slice_size - share_size, share_size, MPI_INT, my_rank-1, DATA_TAG, MPI_COMM_WORLD);
+    }   
+    printf("rank %d: ", my_rank);
+    printv(task, slice_size);
+
+    MPI_Finalize();
+
+}
