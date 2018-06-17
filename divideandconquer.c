@@ -128,10 +128,13 @@ int main(int argc, char **argv)
     //Receives task
     if(my_rank != 0){
 
-	MPI_Recv(task, buffer_size, MPI_INT, MPI_ANY_SOURCE, DATA_TAG, MPI_COMM_WORLD, &status);
+	    MPI_Recv(task, buffer_size, MPI_INT, MPI_ANY_SOURCE, DATA_TAG, MPI_COMM_WORLD, &status);
         MPI_Get_count(&status, MPI_INT, &current_task_size);
-	if(VERBOSE)
+
+	    #if VERBOSE
         	printf("%d Received Downward from: %d, Size: %d \n", my_rank, status.MPI_SOURCE, current_task_size);
+        #endif
+        
         father = status.MPI_SOURCE;
     }
 
@@ -147,42 +150,50 @@ int main(int argc, char **argv)
                 task2 = malloc(sizeof(int) * current_task_size);
 		        task3 = malloc(sizeof(int) * current_task_size);
                 //Test
-		if(VERBOSE){
-                printf("%d Sending Downward to: %d, Size: %d \n", my_rank, (my_rank * 2) + 1, (divide_size/2));
-                printf("%d Sending Downward to: %d, Size: %d \n", my_rank, (my_rank*2)+2, (divide_size - (divide_size / 2)) );
-		}
+
+		        #if VERBOSE
+                    printf("%d Sending Downward to: %d, Size: %d \n", my_rank, (my_rank * 2) + 1, (divide_size/2));
+                    printf("%d Sending Downward to: %d, Size: %d \n", my_rank, (my_rank*2)+2, (divide_size - (divide_size / 2)) );
+		        #endif
 
                 MPI_Send(task + slice_work_size, divide_size / 2, MPI_INT, (my_rank * 2)+1, DATA_TAG, MPI_COMM_WORLD);
                 MPI_Send(task + slice_work_size + (divide_size / 2), divide_size - (divide_size / 2), MPI_INT, (my_rank * 2)+2, DATA_TAG, MPI_COMM_WORLD);
 
-                memcpy(task1, task, slice_work_size * sizeof(int));
+                //memcpy(task1, task, slice_work_size * sizeof(int));
 
-                bubble_sort(task1, slice_work_size);
+                bubble_sort(task, slice_work_size);
 		        //printv(task1, slice_work_size);
 
                 int task2_leng;
                 MPI_Recv(task2, buffer_size, MPI_INT, MPI_ANY_SOURCE, MPI_ANY_TAG, MPI_COMM_WORLD, &status);
                 MPI_Get_count(&status, MPI_INT, &task2_leng);
-		if(VERBOSE)
+
+		        #if VERBOSE
                 	printf("%d Received Msg3 from: %d, Size: %d \n", my_rank, status.MPI_SOURCE, task2_leng);
+                #endif
 
                 int task3_leng;
                 MPI_Recv(task3, buffer_size, MPI_INT, MPI_ANY_SOURCE, MPI_ANY_TAG, MPI_COMM_WORLD, &status);
                 MPI_Get_count(&status, MPI_INT, &task3_leng);
-                if(VERBOSE)
-			printf("%d Received Msg3 from: %d, Size: %d \n", my_rank, status.MPI_SOURCE, task3_leng);
 
-                merge(task, task1, slice_work_size, task2, task2_leng, task3, task3_leng);
+                #if VERBOSE
+			        printf("%d Received Msg3 from: %d, Size: %d \n", my_rank, status.MPI_SOURCE, task3_leng);
+                #endif
+
+                merge(task1, task, slice_work_size, task2, task2_leng, task3, task3_leng);
 
                 if(my_rank != 0){
-                    MPI_Send(task, current_task_size, MPI_INT, father, DONE_TAG, MPI_COMM_WORLD);
+                    MPI_Send(task1, current_task_size, MPI_INT, father, DONE_TAG, MPI_COMM_WORLD);
                 }else{
                     //weeee dobby is freeeeee
                     double end_time = MPI_Wtime();
-		    printf("Time!: %f", end_time - start_time);
-		    if(VERBOSE_OUT)
-			printv(task, current_task_size);
-		}
+		            printf("Time!: %f", end_time - start_time);
+                
+                #if VERBOSE_OUT
+                    printv(task1, current_task_size);
+                #endif
+
+		        }
             }
 
             //Conquer
@@ -193,7 +204,7 @@ int main(int argc, char **argv)
 
     }else{ //Node is a leaf
         bubble_sort(task, current_task_size);
-	MPI_Send(task, current_task_size, MPI_INT, father, DONE_TAG, MPI_COMM_WORLD);
+	    MPI_Send(task, current_task_size, MPI_INT, father, DONE_TAG, MPI_COMM_WORLD);
     }
 
 
