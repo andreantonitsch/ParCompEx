@@ -124,8 +124,8 @@ int main(int argc, char **argv)
         if(my_rank != proc_n-1)
             MPI_Send(task + slice_size -1, 1, MPI_INT, my_rank+1, TEST_TAG, MPI_COMM_WORLD);
         
-        printv(task, slice_size); 
-        printf("biggest = %d \n", *(task + slice_size -1));
+        //printv(task, slice_size); 
+        //printf("biggest = %d \n", *(task + slice_size -1));
 
         if(my_rank != 0)
             MPI_Recv(&left_neighbour_biggust, 1, MPI_INT, my_rank-1, TEST_TAG, MPI_COMM_WORLD, &status);
