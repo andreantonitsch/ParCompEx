@@ -34,6 +34,24 @@ void bubble_sort(int* vector, int size)
     }
 }
 
+void bs(int* vetor, int n)
+{
+    int c=0, d, troca, trocou =1;
+
+    while (c < (n-1) & trocou )
+        {
+        trocou = 0;
+        for (d = 0 ; d < n - c - 1; d++)
+            if (vetor[d] > vetor[d+1])
+                {
+                troca      = vetor[d];
+                vetor[d]   = vetor[d+1];
+                vetor[d+1] = troca;
+                trocou = 1;
+                }
+        c++;
+        }
+}
 
 //Eu me recuso a usar {} quando preciso em um for ou if de um comando. --Agustini, 2018
 //Challenge accepted
@@ -112,6 +130,7 @@ int main(int argc, char **argv)
 
     task = malloc(sizeof(int) * buffer_size);
 
+
     //produces task
     if(my_rank == 0){
         int i;
@@ -138,6 +157,11 @@ int main(int argc, char **argv)
         father = status.MPI_SOURCE;
     }
 
+    task1 = malloc(sizeof(int) * current_task_size);
+    task2 = malloc(sizeof(int) * current_task_size);
+    task3 = malloc(sizeof(int) * current_task_size);
+
+
     //se existe trabalho a ser feito. work work work.
     if(my_rank < proc_n /2) //se node isn't certainly a leaf
     {
@@ -146,9 +170,6 @@ int main(int argc, char **argv)
                 slice_work_size = current_task_size / SELF_PERC;
                 divide_size = current_task_size - slice_work_size;
 
-                task1 = malloc(sizeof(int) * current_task_size);
-                task2 = malloc(sizeof(int) * current_task_size);
-		        task3 = malloc(sizeof(int) * current_task_size);
                 //Test
 
 		        #if VERBOSE
@@ -161,7 +182,7 @@ int main(int argc, char **argv)
 
                 //memcpy(task1, task, slice_work_size * sizeof(int));
 
-                bubble_sort(task, slice_work_size);
+                bs(task, slice_work_size);
 		        //printv(task1, slice_work_size);
 
                 int task2_leng;
@@ -198,12 +219,12 @@ int main(int argc, char **argv)
 
             //Conquer
             else{
-                bubble_sort(task, current_task_size);
+                bs(task, current_task_size);
                 MPI_Send(task, current_task_size, MPI_INT, father, DONE_TAG, MPI_COMM_WORLD);
             }
 
     }else{ //Node is a leaf
-        bubble_sort(task, current_task_size);
+        bs(task, current_task_size);
 	    MPI_Send(task, current_task_size, MPI_INT, father, DONE_TAG, MPI_COMM_WORLD);
     }
 
