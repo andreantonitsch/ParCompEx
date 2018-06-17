@@ -2,14 +2,14 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#define TASK_SIZE  100000
+#define TASK_SIZE  1000000
 #define MINIMUM_WORK  30
 #define SELF_PERC    10 //task_size/self_perc = branch work
 
 #define DATA_TAG  0
 #define DONE_TAG  2
 
-#define VERBOSE 1
+#define VERBOSE 0
 #define VERBOSE_OUT 0
 
 void printv(int* vector, int size){

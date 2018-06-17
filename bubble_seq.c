@@ -49,17 +49,15 @@ int main(int argc, char **argv)
     double start_time;
 
 
-    task = malloc(sizeof(int) * buffer_size);
+    task = malloc(sizeof(int) * TASK_SIZE);
 
     int i;
     for(i = 0; i < TASK_SIZE; i++)
         task[i] = TASK_SIZE - i;
 
-    //placeholder
-    current_task_size = TASK_SIZE;
     start_time = MPI_Wtime();
 
-    bubble_sort(task, current_task_size);
+    bubble_sort(task, TASK_SIZE);
 
     double end_time = MPI_Wtime();
     printf("Time!: %f", end_time - start_time);
