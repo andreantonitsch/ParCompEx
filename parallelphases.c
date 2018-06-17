@@ -3,8 +3,8 @@
 #include <stdlib.h>
 #include <string.h>
 
-#define TASK_SIZE 100
-#define SHARE_ZONE 1 / 5
+#define TASK_SIZE 10000
+#define SHARE_ZONE 2.0f / 5.0f
 
 #define DATA_TAG  0
 #define TEST_TAG  1
@@ -168,9 +168,9 @@ int main(int argc, char **argv)
     
     }   
 
-    printf("rank %d: ", my_rank);
-    printv(task, slice_size);
-    fflush(stdout);
+//    printf("rank %d: ", my_rank);
+//    printv(task, slice_size);
+//    fflush(stdout);
     MPI_Finalize();
 
 }
