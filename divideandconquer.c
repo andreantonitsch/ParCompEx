@@ -4,7 +4,7 @@
 #include <string.h>
 #define TASK_SIZE  1000000
 #define MINIMUM_WORK  30
-#define SELF_PERC    10 //task_size/self_perc = branch work
+#define SELF_PERC    20 //task_size/self_perc = branch work
 
 #define DATA_TAG  0
 #define DONE_TAG  2
@@ -116,7 +116,8 @@ void interleave (int result [] , int a [] , int b [], int c [], int msg_size, in
 int* interleaveanny(int a[], int s, int i1, int i2, int i3)
 {
 	int* aux;
-	int i1, i2, i3, i_aux;
+	//int i1, i2, i3;
+	int i_aux;
 	int diff = i3;
 
 	aux = (int*) malloc(sizeof(int) * s);
