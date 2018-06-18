@@ -2,7 +2,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#define TASK_SIZE  100000
+#define TASK_SIZE  10000
 #define MINIMUM_WORK  30
 #define SELF_PERC    10 //task_size/self_perc = branch work
 

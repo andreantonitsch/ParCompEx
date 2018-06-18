@@ -53,6 +53,67 @@ void bs(int* vetor, int n)
         }
 }
 
+void interleave (int result [] , int a [] , int b [], int c [], int msg_size, int a_size, int b_size, int c_size) {
+
+  int i = 0;
+  int j = 0;
+  int k = 0;
+
+  int position = 0;
+
+  while (position < msg_size) {
+
+      if ( i < a_size ) {
+
+          if ( j < b_size ) {
+
+              if ( k < c_size ) {
+
+                  if ( a[i] < b[j] ) {
+
+                      if ( a[i] < c[k] ) { result[position] = a[i]; i++; position++; }
+                      else { result[position] = c[k]; k++; position++; }
+
+                  } else {
+
+                      if ( b[j] < c[k] ) { result[position] = b[j]; j++; position++; }
+                      else { result[position] = c[k]; k++; position++; }
+
+                  }
+
+              } else { /* c ended */
+
+                  if ( a[i] < b[j] ) { result[position] = a[i]; i++; position++; }
+                  else { result[position] = b[j]; j++; position++; }
+
+              }
+
+          } else { /* b ended */
+
+              if ( k < c_size ) {
+
+                  if ( a[i] < c[k] ) { result[position] = a[i]; i++; position++; }
+                  else { result[position] = c[k]; k++; position++; }
+
+              } else { /* b and c ended */ result[position] = a[i]; i++; position++; }
+
+          }
+
+      } else if ( j < b_size ) { /* a ended */
+
+          if ( k < c_size ) {
+
+              if ( b[j] < c[k] ) { result[position] = b[j]; j++; position++; }
+              else { result[position] = c[k]; k++; position++; }
+
+          } else { /* a and c ended */ result[position] = b[j]; j++; position++; }
+
+      } else if ( k < c_size ) { /* a and b ended */ result[position] = c[k]; k++; position++; }
+
+  }
+
+}
+
 //Eu me recuso a usar {} quando preciso em um for ou if de um comando. --Agustini, 2018
 //Challenge accepted
 void merge(int*output, int* vector1, int size1, int* vector2, int size2, int* vector3, int size3)
@@ -204,7 +265,7 @@ int main(int argc, char **argv)
 			        printf("%d Received Msg3 from: %d, Size: %d \n", my_rank, status.MPI_SOURCE, task3_leng);
                 #endif
 
-                merge(task1, task, slice_work_size, task2, task2_leng, task3, task3_leng);
+                interleave(task1, task, task2, task3, slice_work_size+task2_leng+task3_leng, slice_work_size, task2_leng, task3_leng);
 
                 if(my_rank != 0){
                     MPI_Send(task1, current_task_size, MPI_INT, father, DONE_TAG, MPI_COMM_WORLD);
