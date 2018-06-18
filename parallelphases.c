@@ -85,6 +85,7 @@ int main(int argc, char **argv)
 
     task = malloc(sizeof(int) * (slice_size + share_size));
 
+    int iteration = 0;
 //#if VERBOSE
   //  printf("start");
   //  fflush(stdout);

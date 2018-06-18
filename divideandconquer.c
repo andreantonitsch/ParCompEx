@@ -158,8 +158,8 @@ int main(int argc, char **argv)
     }
 
     task1 = malloc(sizeof(int) * current_task_size);
-    task2 = malloc(sizeof(int) * current_task_size);
-    task3 = malloc(sizeof(int) * current_task_size);
+    //task2 = malloc(sizeof(int) * current_task_size);
+    //task3 = malloc(sizeof(int) * current_task_size);
 
 
     //se existe trabalho a ser feito. work work work.
@@ -170,6 +170,9 @@ int main(int argc, char **argv)
                 slice_work_size = current_task_size / SELF_PERC;
                 divide_size = current_task_size - slice_work_size;
 
+                task2 = task + slice_work_size;
+                task3 = task + slice_work_size + (divide_size / 2);
+
                 //Test
 
 		        #if VERBOSE
@@ -177,8 +180,8 @@ int main(int argc, char **argv)
                     printf("%d Sending Downward to: %d, Size: %d \n", my_rank, (my_rank*2)+2, (divide_size - (divide_size / 2)) );
 		        #endif
 
-                MPI_Send(task + slice_work_size, divide_size / 2, MPI_INT, (my_rank * 2)+1, DATA_TAG, MPI_COMM_WORLD);
-                MPI_Send(task + slice_work_size + (divide_size / 2), divide_size - (divide_size / 2), MPI_INT, (my_rank * 2)+2, DATA_TAG, MPI_COMM_WORLD);
+                MPI_Send(task2, divide_size / 2, MPI_INT, (my_rank * 2)+1, DATA_TAG, MPI_COMM_WORLD);
+                MPI_Send(task3, divide_size - (divide_size / 2), MPI_INT, (my_rank * 2)+2, DATA_TAG, MPI_COMM_WORLD);
 
                 //memcpy(task1, task, slice_work_size * sizeof(int));
 
