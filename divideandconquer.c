@@ -113,7 +113,33 @@ void interleave (int result [] , int a [] , int b [], int c [], int msg_size, in
   }
 
 }
+int* interleaveanny(int a[], int s, int i1, int i2, int i3)
+{
+	int* aux;
+	int i1, i2, i3, i_aux;
+	int diff = i3;
 
+	aux = (int*) malloc(sizeof(int) * s);
+
+	//i1 = 0;
+	//i2 = diff;
+	//i3 = (s - diff)/2 + diff;
+
+	for (i_aux = 0; i_aux < s; i_aux++)
+	{
+		if (((a[i1] <= a[i2]) || (i2 == ((s-diff)/2 + diff))) 
+		&& ((a[i1] <= a[i3]) || (i3 == s)) 
+		&& (i1 < diff)) { aux[i_aux] = a[i1++]; }
+		else
+		{
+			if (((a[i2] <= a[i1]) || (i1 == diff))
+			&& ((a[i2] <= a[i3]) || (i3 == s))
+			&& (i2 < ((s-diff)/2 + diff))) { aux[i_aux] = a[i2++]; } 
+			else { aux[i_aux] = a[i3++]; }
+		} 
+	}
+	return aux;
+}
 //Eu me recuso a usar {} quando preciso em um for ou if de um comando. --Agustini, 2018
 //Challenge accepted
 void merge(int*output, int* vector1, int size1, int* vector2, int size2, int* vector3, int size3)
@@ -265,7 +291,8 @@ int main(int argc, char **argv)
 			        printf("%d Received Msg3 from: %d, Size: %d \n", my_rank, status.MPI_SOURCE, task3_leng);
                 #endif
 
-                interleave(task1, task, task2, task3, slice_work_size+task2_leng+task3_leng, slice_work_size, task2_leng, task3_leng);
+                //interleave(task1, task, task2, task3, slice_work_size+task2_leng+task3_leng, slice_work_size, task2_leng, task3_leng);
+                interleaveanny(task, current_task_size, slice_work_size, task2_leng, task3_leng);
 
                 if(my_rank != 0){
                     MPI_Send(task1, current_task_size, MPI_INT, father, DONE_TAG, MPI_COMM_WORLD);
